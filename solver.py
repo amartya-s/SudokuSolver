@@ -1,3 +1,7 @@
+import tkinter as tk
+
+UPDATE_RATE = 100
+
 import math
 import time
 
@@ -13,10 +17,13 @@ class Cell(object):
         self.col_w = col_w
         self.box_w = box_w
         self.wt = wt
+        self.possible_moves = []
+        self.tried_moves = []
+        self.label = None
 
 
 class Sudoku(object):
-    def __init__(self, matrix):
+    def __init__(self, matrix, gui):
 
         self.const = int(math.sqrt(len(matrix)))
         self.moves = []
@@ -25,6 +32,8 @@ class Sudoku(object):
         self.matrix = []
         self.same_column_cells = dict()
         self.same_box_cells = dict()
+
+        self.gui = gui
 
         for row in range(0, len(matrix)):
             self.matrix.append([])
@@ -170,6 +179,14 @@ class Sudoku(object):
 
     def fill_cell(self, cell, value):
         cell.val = value
+        cell.label['text'] = value
+        cell.moves_label['text'] = "{}".format(cell.possible_moves)
+        if value != -1:
+            cell.label['bg'] = 'green'
+        else:
+            cell.label['bg'] = 'red'
+        # time.sleep(0.05)
+        self.gui.update_idletasks()
 
     def is_solved(self):
         return len(self.moves) == self.required_moves
@@ -213,16 +230,18 @@ class Sudoku(object):
             print("Wrong move picked: [{},{}]> {}".format(cell.row, cell.col, cell.val))
             return False
 
+        cell.possible_moves = possible_values
         self.moves.append(cell)
 
         for move in possible_values:
+
+            cell.tried_moves.append(move)
             self.fill_cell(cell, move)
 
             self.compute_weights(cell)
 
             print("Chose move [{},{}]->{} ".format(cell.row, cell.col, move))
             print()
-
             status = self.solve_recursively()
 
             print("Status of move [{},{}]->{} = {}".format(cell.row, cell.col, move, status))
@@ -230,10 +249,16 @@ class Sudoku(object):
             if status:
                 return True
 
+            cell.tried_moves.pop()
+
         else:
             print("All possible moves on [{},{}] failed. Need to backtrack now".format(cell.row, cell.col))
             print()
-            cell.val = -1
+
+            cell.tried_moves = []
+            cell.possible_moves = []
+
+            self.fill_cell(cell, -1)
             self.compute_weights(cell, revert=True)
             self.moves.pop()
 
@@ -244,39 +269,6 @@ class Sudoku(object):
 
         self.solve_recursively()
 
-
-if __name__ == '__main__':
-    matrix = [[-1, -1, -1, 6, -1, -1, 4, -1, -1],
-              [7, -1, -1, -1, -1, 3, 6, -1, -1],
-              [-1, -1, -1, -1, 9, 1, -1, 8, -1],
-              [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-              [-1, 5, -1, 1, 8, -1, -1, -1, 3],
-              [-1, -1, -1, 3, -1, 6, -1, 4, 5],
-              [-1, 4, -1, 2, -1, -1, -1, 6, -1],
-              [9, -1, 3, -1, -1, -1, -1, -1, -1],
-              [-1, 2, -1, -1, -1, -1, 1, -1, -1]]
-
-    start_time = time.time()
-
-    # for i in range(0, 9):
-    #     for j in range(0, 9):
-    #         matrix[i][j] = -1
-
-    sudoku = Sudoku(matrix)
-    sudoku.solve()
-
-    success = sudoku.verify()
-
-    if success:
-        print("GOT CORRECT SOLUTION")
-    else:
-        print("SOLUTION IS NOT CORRECT")
-
-    sudoku.print_matrix()
-
-    end_time = time.time()
-
-    print("Time taken: {}s".format(end_time - start_time))
 
 #              [[8, 3, 5, 4, 1, 6, 9, 2, 7],
 #              [2, 9, 6, 8, 5, 7, 4, 3, 1],
@@ -297,3 +289,110 @@ if __name__ == '__main__':
 #  [-1, 4, -1, 2, -1, -1, -1, 6, -1],
 #  [9, -1, 3, -1, -1, -1, -1, -1, -1],
 #  [-1, 2, -1, -1, -1, -1, 1, -1, -1]]
+
+
+class Application(tk.Frame):
+    def __init__(self, master=None, matrix=[]):
+        super().__init__(master)
+
+        self.master = master
+        self.sudoku = Sudoku(matrix, self.master)
+        self.create_widgets()
+        # self.updater()
+
+    def hit(self):
+        cell = self.sudoku.matrix[0][0]
+        cell.textvariable.set("!@")
+        time.sleep(1)
+        cell.textvariable.set("1")
+        time.sleep(1)
+        cell.textvariable.set("3")
+
+    def create_widgets(self):
+
+        container = tk.Frame(self.master, width=200, height=200)
+        container.pack(side=tk.BOTTOM, fill="both")
+
+        f2 = tk.Frame(self.master, bg="black", height=100, width=100)
+        f2.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        bt = tk.Button(container, bg="white", text="SOLVE", command=self.sudoku.solve)
+        bt.pack(side=tk.BOTTOM)
+
+        f3 = tk.Frame(f2, bg="white", height=600, width=600)
+        f3.pack(side=tk.TOP, fill="both", pady=10, padx=10)
+
+        sudoku_cells = self.sudoku.matrix
+
+        for row, row_cells in enumerate(sudoku_cells):
+            for column, cell in enumerate(row_cells):
+
+                # label = tk.Label(f3, height=2, width=4,bg="pink",fg='black', activeforeground="pink",font = "Times 20")
+                # label['text'] = cell.val
+                #
+                # if (cell.val != -1):
+                #     label['fg'] = "blue"
+                #     label['font'] = 'Times 20 bold'
+                #
+                # label.grid(row=row, column=column, padx=3, pady=3, ipadx=5,ipady=5)
+                #
+                # moves_label = tk.Label(f3, height=2, width=4,bg="pink",fg='black', activeforeground="pink",font = "Times 20")
+                # moves_label['text'] = "[3]"
+                # moves_label.grid(row=row+1, column=column, padx=3, pady=3, ipadx=5,ipady=5)
+                #
+                # cell.label = label
+                # cell.moves_label = moves_label
+                # # label['textvariable'] = cell.val
+                # # label.pack()
+
+                cell_frame = tk.Frame(f3, bg="white", height=70, width=70)
+                cell_frame.grid(row=row, column=column, padx=3, pady=3)
+
+                label = tk.Label(cell_frame, height=3, width=5, bg="pink", fg='black', activeforeground="pink",
+                                 font="Times 20")
+                label['text'] = cell.val
+
+                if (cell.val != -1):
+                    label['fg'] = "blue"
+                    label['font'] = 'Times 20 bold'
+
+                label.pack()
+
+                moves_label = tk.Label(cell_frame, height=1, width=5, bg="pink", fg='black', activeforeground="pink",
+                                       font="Times 10")
+                moves_label.pack()
+
+                cell.label = label
+                cell.moves_label = moves_label
+
+        pass
+
+    def updater(self):
+        print('updated')
+        self.after(UPDATE_RATE, self.updater)
+
+
+if __name__ == '__main__':
+    matrix = [[-1, -1, -1, 6, -1, -1, 4, -1, -1],
+              [7, -1, -1, -1, -1, 3, 6, -1, -1],
+              [-1, -1, -1, -1, 9, 1, -1, 8, -1],
+              [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+              [-1, 5, -1, 1, 8, -1, -1, -1, 3],
+              [-1, -1, -1, 3, -1, 6, -1, 4, 5],
+              [-1, 4, -1, 2, -1, -1, -1, 6, -1],
+              [9, -1, 3, -1, -1, -1, -1, -1, -1],
+              [-1, 2, -1, -1, -1, -1, 1, -1, -1]]
+
+    root = tk.Tk()
+    app = Application(master=root, matrix=matrix)
+
+    app.master.title("Sudoku Solver")
+    app.master.geometry("900x900")
+
+    start_time = time.time()
+
+    # for i in range(0, 9):
+    #     for j in range(0, 9):
+    #         matrix[i][j] = -1
+
+    app.mainloop()
