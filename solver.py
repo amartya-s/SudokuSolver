@@ -4,6 +4,7 @@ UPDATE_RATE = 100
 
 import math
 import time
+import copy
 
 EMPTY_CELL_VALUE = -1
 
@@ -18,33 +19,47 @@ class Cell(object):
         self.box_w = box_w
         self.wt = wt
         self.possible_moves = []
-        self.tried_moves = []
         self.label = None
 
 
 class Sudoku(object):
-    def __init__(self, matrix, gui):
+    def __init__(self, gui=None, **kwargs):
 
-        self.const = int(math.sqrt(len(matrix)))
+        print(kwargs)
+        matrix = kwargs.get('matrix', [])
+        size = kwargs.get('size', 9)
+
+        is_empty = False
+
+        if not matrix:
+            is_empty = True
+
+        self.const = int(math.sqrt(size))
         self.moves = []
         self.required_moves = 0
 
         self.matrix = []
         self.same_column_cells = dict()
         self.same_box_cells = dict()
+        self.delay = 0
+
 
         self.gui = gui
+        self.total_moves = 0
 
-        for row in range(0, len(matrix)):
+        for row in range(0, (self.const ** 2)):
             self.matrix.append([])
-            for col in range(0, len(matrix)):
-                val = matrix[row][col]
+            for col in range(0, (self.const ** 2)):
+                if is_empty:
+                    val = -1
+                else:
+                    val = matrix[row][col]
 
                 cell = Cell(val, row, col)
 
                 self.matrix[row].append(cell)
 
-                if matrix[row][col] == -1:
+                if val == -1:
                     self.required_moves += 1
 
                 if col not in self.same_column_cells:
@@ -179,14 +194,23 @@ class Sudoku(object):
 
     def fill_cell(self, cell, value):
         cell.val = value
-        cell.label['text'] = value
-        cell.moves_label['text'] = "{}".format(cell.possible_moves)
-        if value != -1:
-            cell.label['bg'] = 'green'
+        self.total_moves += 1
+        print("MOVES: {}".format(self.total_moves))
+        cell.label.delete("1.0", tk.END)
+        if value == -1:
+            cell.label.insert('')
+            cell.label['bg'] = 'rosybrown1'
+            # cell.label['relief'] = 'groove'
         else:
-            cell.label['bg'] = 'red'
-        # time.sleep(0.05)
+            cell.label.insert(value)
+            cell.label['bg'] = 'rosybrown2'
+            # cell.label['relief'] = 'groove'
+
+        cell.moves_label['text'] = "{}".format(cell.possible_moves)
+
         self.gui.update_idletasks()
+        time.sleep(self.delay)
+
 
     def is_solved(self):
         return len(self.moves) == self.required_moves
@@ -230,12 +254,10 @@ class Sudoku(object):
             print("Wrong move picked: [{},{}]> {}".format(cell.row, cell.col, cell.val))
             return False
 
-        cell.possible_moves = possible_values
+        cell.possible_moves = copy.copy(possible_values)
         self.moves.append(cell)
 
         for move in possible_values:
-
-            cell.tried_moves.append(move)
             self.fill_cell(cell, move)
 
             self.compute_weights(cell)
@@ -249,13 +271,12 @@ class Sudoku(object):
             if status:
                 return True
 
-            cell.tried_moves.pop()
+            cell.possible_moves.remove(move)
 
         else:
             print("All possible moves on [{},{}] failed. Need to backtrack now".format(cell.row, cell.col))
             print()
 
-            cell.tried_moves = []
             cell.possible_moves = []
 
             self.fill_cell(cell, -1)
@@ -264,11 +285,65 @@ class Sudoku(object):
 
             return False
 
-    def solve(self):
+    def solve(self, delay_in_moves=0):
+        self.delay = delay_in_moves
+        self.total_moves = 0
         self.compute_weights()
 
-        self.solve_recursively()
+        status = self.solve_recursively()
 
+        print("Status of solving sudoku: {}".format(status))
+
+        return status
+
+    @staticmethod
+    def get_random_sudoku():
+        matrix = [[-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, 1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, -1, -1, -1, -1, -1, 1, -1, -1]]
+
+    considered_box = []
+    considered_row = []
+
+    pass
+
+    @staticmethod
+    def get_sample_sudoku():
+        matrix = [[-1, -1, -1, 6, -1, -1, 4, -1, -1],
+                  [7, -1, -1, -1, -1, 3, 6, -1, -1],
+                  [-1, -1, -1, -1, 9, 1, -1, 8, -1],
+                  [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, 5, -1, 1, 8, -1, -1, -1, 3],
+                  [-1, -1, -1, 3, -1, 6, -1, 4, 5],
+                  [-1, 4, -1, 2, -1, -1, -1, 6, -1],
+                  [9, -1, 3, -1, -1, -1, -1, -1, -1],
+                  [-1, 2, -1, -1, -1, -1, 1, -1, -1]]
+        matrix = [[-1, -1, -1, 6, -1, -1, 4, -1, -1],
+                  [7, -1, -1, -1, -1, 3, 6, -1, -1],
+                  [-1, -1, -1, -1, 9, 1, -1, 8, -1],
+                  [-1, -1, -1, -1, -1, -1, -1, -1, -1],
+                  [-1, 5, -1, 1, 8, -1, -1, -1, 3],
+                  [-1, -1, -1, 3, -1, 6, -1, 4, 5],
+                  [-1, 4, -1, 2, -1, -1, -1, 6, -1],
+                  [9, -1, 3, -1, -1, -1, -1, -1, -1],
+                  [-1, 2, -1, -1, -1, -1, 1, -1, -1]]
+        # matrix =   [[-1, 1, -1, -1, 8, -1, -1, 9, -1],
+        #              [7, -1, -1, 4, -1, -1, 1, -1, -1],
+        #              [7, -1, -1, 4, -1, -1, 1, -1, -1],
+        #              [4, -1, -1, 3, -1, -1, 5, -1, -1],
+        #              [-1, 9, -1, -1, 4, -1, -1, 5, -1],
+        #              [5, -1, -1, -1, -1, -1, 7, -1, -1],
+        #              [6, -1, -1, 2, -1, -1, 4, -1, -1],
+        #              [-1, 2, -1, -1, 3, -1, -1, 1, -1],
+        #              [3, -1, -1, 5, -1, -1, 8, -1, -1],
+        #              [1, -1, -1, 8, -1, -1, 9, -1, -1]]
+        return matrix
 
 #              [[8, 3, 5, 4, 1, 6, 9, 2, 7],
 #              [2, 9, 6, 8, 5, 7, 4, 3, 1],
@@ -289,83 +364,212 @@ class Sudoku(object):
 #  [-1, 4, -1, 2, -1, -1, -1, 6, -1],
 #  [9, -1, 3, -1, -1, -1, -1, -1, -1],
 #  [-1, 2, -1, -1, -1, -1, 1, -1, -1]]
+class CustomText(tk.Text):
+    def __init__(self, cell, *args, **kwargs):
+        """A text widget that report on internal widget commands"""
+        tk.Text.__init__(self, *args, **kwargs)
 
+        # create a proxy for the underlying widget
+        self.cell = cell
+        self._orig = self._w + "_orig"
+        self.tk.call("rename", self._w, self._orig)
+        self.tk.createcommand(self._w, self._proxy)
+
+    def insert(self, text=''):
+        self.delete("1.0", tk.END)
+        super().insert("1.0", text, "center")
+
+    def _proxy(self, command, *args):
+        cmd = (self._orig, command) + args
+        result = self.tk.call(cmd)
+
+        if command in ("insert", "replace"):
+            self.event_generate("<<TextModified>>")
+
+        if command == 'delete':
+            self.event_generate("<<TextDeleted>>")
+
+        return result
 
 class Application(tk.Frame):
-    def __init__(self, master=None, matrix=[]):
+    def __init__(self, master=None):
         super().__init__(master)
 
         self.master = master
-        self.sudoku = Sudoku(matrix, self.master)
-        self.create_widgets()
-        # self.updater()
+        self.slider = None
+        self.status_label = None
 
-    def hit(self):
-        cell = self.sudoku.matrix[0][0]
-        cell.textvariable.set("!@")
-        time.sleep(1)
-        cell.textvariable.set("1")
-        time.sleep(1)
-        cell.textvariable.set("3")
+        self.create_widgets()
+        self.sudoku_cell_gui_objs = []
+
+    def load_sample_sudoku(self, frame):
+        sample_sudoku = Sudoku.get_sample_sudoku()
+        self.sudoku = Sudoku(gui=frame, **{'matrix': sample_sudoku, 'size': len(sample_sudoku)})
+        self.create_sudoku_layout(frame)
+
+    def create_empty_sudoku(self, frame, size=9):
+        self.sudoku = Sudoku(gui=frame, **{'matrix': [], 'size': size})
+        self.create_sudoku_layout(frame)
+
+    def retrieve_input(self, frame):
+        childrens = frame.winfo_children()
+        for ch in childrens:
+            childs = ch.winfo_children()
+
+            print([type(child) for child in childs])
+
+    def solve_sudoku(self, frame):
+
+        self.retrieve_input(frame)
+
+        children = frame.winfo_children()
+
+        text_labels = []
+
+        for child in children:
+            for sub_child in child.winfo_children():
+                sub_child.unbind("<<TextModified>>")
+                sub_child.unbind("<<TextDeleted>>")
+                text_labels.append(sub_child)
+        print(self.sudoku.print_matrix())
+
+        status = self.sudoku.solve(int(self.slider.get()) / 1000)
+        if status:
+            self.status_label['text'] = 'Soduko Solved !'
+        else:
+            self.status_label['text'] = 'Invalid input. Unable to solve the sudoku'
+
+        for label in text_labels:
+            label.bind("<<TextModified>>", self.onModification)
+            label.bind("<<TextDeleted>>", self.onDeletion)
+
+        print("Total moves: {}".format(self.sudoku.total_moves))
+
+    def updated_timer(self, *args):
+        timer_val = int(args[0])
+        timer_val = timer_val / 10
+
+    def onDeletion(self, event):
+        print("delete called")
+        text = event.widget
+
+        val = event.widget.get("1.0", "end-1c")
+
+        # check if still it's valid
+        try:
+            val = int(val)
+            text.cell.val = val
+            text['fg'] = "white"
+            text['bg'] = 'rosybrown3'
+            text['relief'] = 'sunken'
+            return
+        except:
+            print("Invalid literal")
+            text['bg'] = 'rosybrown1'
+            text['fg'] = 'black'
+            text['relief'] = "groove"
+            text.cell.val = -1
+
+    def onModification(self, event, delete=True):
+        print('insert called')
+        text = event.widget
+        val = event.widget.get("1.0", "end-1c")
+
+        try:
+            val = int(val)
+        except:
+            print("Invalid literal")
+            text.delete("1.0", tk.END)
+            return
+
+        text['fg'] = "white"
+        text['bg'] = 'rosybrown3'
+        text['relief'] = 'sunken'
+        text.cell.val = val
+
+    def vcmd(self, action, index, value_if_allowed,
+             prior_value, text, validation_type, trigger_type, widget_name):
+
+        if value_if_allowed:
+            try:
+                int(value_if_allowed)
+                return True
+            except ValueError:
+                return False
+        else:
+            return False
+
+    def create_sudoku_layout(self, frame):
+
+        for row, row_cells in enumerate(self.sudoku.matrix):
+            self.sudoku_cell_gui_objs.append([])
+            for column, cell in enumerate(row_cells):
+                cell_frame = tk.Frame(frame, bg="white", height=70, width=70)
+
+                cell_frame.grid(row=row, column=column, padx=5, pady=5)
+
+                text = CustomText(cell, cell_frame, bg='rosybrown1', fg='black', height=2, width=4,
+                                  font="Times 20 bold", borderwidth=4, relief="groove")
+                text.tag_configure("center", justify='center')
+                text.tag_add("center", 1.0, "end")
+
+                if (cell.val != -1):
+                    text['fg'] = "white"
+                    text['bg'] = 'rosybrown3'
+                    text['relief'] = 'sunken'
+                    text.insert(cell.val)
+                    text['state'] = tk.DISABLED
+                else:
+                    text.insert('')
+                    pass
+                text.pack(ipadx=5, ipady=5)
+                text.bind("<<TextModified>>", self.onModification)
+                text.bind("<<TextDeleted>>", self.onDeletion)
+
+                self.sudoku_cell_gui_objs[row].append(text)
+
+                moves_label = tk.Label(cell_frame, height=1, width=5, bg='rosybrown2',
+                                       font="Times 10 italic")
+                moves_label.pack(fill="both", expand=True)
+
+                cell.label = text
+                cell.moves_label = moves_label
 
     def create_widgets(self):
 
-        container = tk.Frame(self.master, width=200, height=200)
-        container.pack(side=tk.BOTTOM, fill="both")
+        button_frame = tk.Frame(self.master)
+        button_frame.pack(side=tk.LEFT, padx=20)
+        # button_frame.grid(row=0,rowspan=100, column=0,columnspan=10)
 
-        f2 = tk.Frame(self.master, bg="black", height=100, width=100)
-        f2.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        sudoku_frame = tk.Frame(self.master, borderwidth=2, relief="solid")
+        sudoku_frame.pack(side=tk.RIGHT, fill=tk.NONE, ipadx=50, expand=True)
+        # sudoku_frame.grid(row=0, column=11, rowspan=100)
 
-        bt = tk.Button(container, bg="white", text="SOLVE", command=self.sudoku.solve)
-        bt.pack(side=tk.BOTTOM)
+        load_sample_sudoku_bt = tk.Button(button_frame, bg="thistle2", text="LOAD SAMPLE", height=2, width=20,
+                                          borderwidth=2, relief="raised",
+                                          command=lambda: self.load_sample_sudoku(sudoku_frame))
+        load_sample_sudoku_bt.pack(pady=10)
 
-        f3 = tk.Frame(f2, bg="white", height=600, width=600)
-        f3.pack(side=tk.TOP, fill="both", pady=10, padx=10)
+        create_empty_sudoku_bt = tk.Button(button_frame, bg="thistle2", text="NEW SUDOKU", height=2, width=20,
+                                           borderwidth=2, relief="raised",
+                                           command=lambda: self.create_empty_sudoku(sudoku_frame))
+        create_empty_sudoku_bt.pack(pady=10)
 
-        sudoku_cells = self.sudoku.matrix
+        solve_bt = tk.Button(button_frame, bg="thistle2", text="SOLVE", borderwidth=2, height=2, width=20,
+                             relief="raised", command=lambda: self.solve_sudoku(sudoku_frame))
+        solve_bt.pack(pady=10)
 
-        for row, row_cells in enumerate(sudoku_cells):
-            for column, cell in enumerate(row_cells):
+        slider = tk.Scale(button_frame, label="delay (ms)", length=150, bg="thistle2", from_=0, to=1000,
+                          tickinterval=200, borderwidth=2, relief="raised", command=self.updated_timer,
+                          orient=tk.HORIZONTAL, sliderlength=20)
+        self.slider = slider
+        slider.pack(pady=10)
 
-                # label = tk.Label(f3, height=2, width=4,bg="pink",fg='black', activeforeground="pink",font = "Times 20")
-                # label['text'] = cell.val
-                #
-                # if (cell.val != -1):
-                #     label['fg'] = "blue"
-                #     label['font'] = 'Times 20 bold'
-                #
-                # label.grid(row=row, column=column, padx=3, pady=3, ipadx=5,ipady=5)
-                #
-                # moves_label = tk.Label(f3, height=2, width=4,bg="pink",fg='black', activeforeground="pink",font = "Times 20")
-                # moves_label['text'] = "[3]"
-                # moves_label.grid(row=row+1, column=column, padx=3, pady=3, ipadx=5,ipady=5)
-                #
-                # cell.label = label
-                # cell.moves_label = moves_label
-                # # label['textvariable'] = cell.val
-                # # label.pack()
+        tk.Label(button_frame, text="(delay between moves in ms)").pack()
 
-                cell_frame = tk.Frame(f3, bg="white", height=70, width=70)
-                cell_frame.grid(row=row, column=column, padx=3, pady=3)
+        self.status_label = tk.Label(button_frame, font='Times 15 bold')
+        self.status_label.pack()
 
-                label = tk.Label(cell_frame, height=3, width=5, bg="pink", fg='black', activeforeground="pink",
-                                 font="Times 20")
-                label['text'] = cell.val
-
-                if (cell.val != -1):
-                    label['fg'] = "blue"
-                    label['font'] = 'Times 20 bold'
-
-                label.pack()
-
-                moves_label = tk.Label(cell_frame, height=1, width=5, bg="pink", fg='black', activeforeground="pink",
-                                       font="Times 10")
-                moves_label.pack()
-
-                cell.label = label
-                cell.moves_label = moves_label
-
-        pass
 
     def updater(self):
         print('updated')
@@ -373,26 +577,20 @@ class Application(tk.Frame):
 
 
 if __name__ == '__main__':
-    matrix = [[-1, -1, -1, 6, -1, -1, 4, -1, -1],
-              [7, -1, -1, -1, -1, 3, 6, -1, -1],
-              [-1, -1, -1, -1, 9, 1, -1, 8, -1],
-              [-1, -1, -1, -1, -1, -1, -1, -1, -1],
-              [-1, 5, -1, 1, 8, -1, -1, -1, 3],
-              [-1, -1, -1, 3, -1, 6, -1, 4, 5],
-              [-1, 4, -1, 2, -1, -1, -1, 6, -1],
-              [9, -1, 3, -1, -1, -1, -1, -1, -1],
-              [-1, 2, -1, -1, -1, -1, 1, -1, -1]]
+
 
     root = tk.Tk()
-    app = Application(master=root, matrix=matrix)
+    app = Application(master=root)
 
     app.master.title("Sudoku Solver")
-    app.master.geometry("900x900")
+    app.master.geometry("1000x900")
 
     start_time = time.time()
 
-    # for i in range(0, 9):
-    #     for j in range(0, 9):
-    #         matrix[i][j] = -1
 
     app.mainloop()
+
+    sudoku = Sudoku(**{'matrix': Sudoku.get_sample_sudoku()})
+    sudoku.solve()
+
+    print(sudoku.total_moves)
