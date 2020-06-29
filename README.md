@@ -1,2 +1,2 @@
 # SudokuSolver
-A simple solver program for Sudoku puzzles
+A simple solver with GUI for Sudoku puzzles
