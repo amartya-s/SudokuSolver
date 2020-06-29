@@ -1,5 +1,5 @@
 # SudokuSolver
-# A simple solver with GUI for Sudoku puzzles.
+## A simple solver with GUI for Sudoku puzzles.
 ## Watch the program solve sudoku using recursion and backtracking algorithm. 
 
 <h3>Run from sample sudoku</h3>
