@@ -187,7 +187,7 @@ class Application(tk.Frame):
 
                 moves_label = tk.Label(cell_frame, height=1, width=5, bg='rosybrown2',
                                        font="Times 10 italic")
-                moves_label.pack(fill="both", expand=True)
+                # moves_label.pack(fill="both", expand=True)
 
                 cell.label = text
                 cell.moves_label = moves_label
@@ -230,13 +230,14 @@ if __name__ == '__main__':
     s_time = time.time()
 
     root = tk.Tk()
+
+    img = tk.PhotoImage('images/sudoku.ico')
+    root.iconbitmap(img)
+
     app = Application(master=root)
 
     app.master.title("Sudoku Solver")
     app.master.geometry("1000x900")
 
-    start_time = time.time()
-
-    print(time.time() - s_time)
 
     app.mainloop()
