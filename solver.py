@@ -2,10 +2,10 @@ import copy
 
 from SudokuSolver.sudoku import Sudoku
 
-EMPTY_CELL_VALUE = -1
+EMPTY_CELL_VALUE = Sudoku.EMPTY_CELL_VALUE
 
 
-class SudokuSolver(Sudoku):
+class Solver(Sudoku):
     def compute_weights(self, cell=None, revert=False):
         if cell:
             original_cell = cell
@@ -183,14 +183,22 @@ class SudokuSolver(Sudoku):
 
     def solve(self):
         self.total_moves = 0
-        self.initialize()
-        self.compute_weights()
 
-        status = self.solve_recursively()
+        validation = self.validate_and_init()
 
-        print("Status of solving sudoku: {}".format(status))
+        print("Validation status {}".format(validation))
 
-        return status
+        if validation:
+            self.compute_weights()
+
+            solver_status = self.solve_recursively()
+
+            print("Status of solving sudoku: {}".format(solver_status))
+
+            return True, True
+
+        else:
+            return False, False
 
 
 if __name__ == '__main__':

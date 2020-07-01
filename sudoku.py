@@ -1,7 +1,6 @@
 import math
 import random
 
-
 class Cell(object):
     def __init__(self, val, row, col, row_w=0, col_w=0, box_w=0, wt=0):
         self.val = val
@@ -17,6 +16,8 @@ class Cell(object):
 
 
 class Sudoku(object):
+    EMPTY_CELL_VALUE = -1
+
     def __init__(self, gui=None, **kwargs):
 
         print(kwargs)
@@ -91,6 +92,60 @@ class Sudoku(object):
             for cell in row_elements:
                 print("{}:[{},{},{},{}],  ".format(cell.val, cell.row_w, cell.col_w, cell.box_w, cell.wt), end='')
             print()
+
+    def validate_and_init(self):
+        column_cells = dict()
+        box_cells = dict()
+        for row, row_cells_objs in enumerate(self.matrix):
+            row_cells = dict()
+            for column, cell in enumerate(row_cells_objs):
+                if cell.val == -1:
+                    self.required_moves += 1
+
+                # duplicate check on row
+                if cell.val != Sudoku.EMPTY_CELL_VALUE:
+                    if cell.col not in row_cells:
+                        row_cells[cell.col] = set()
+
+                    if cell.val in row_cells[cell.col]:
+                        return False
+
+                    row_cells[cell.col].add(cell.val)
+
+                # duplicate check on column
+                if cell.val != Sudoku.EMPTY_CELL_VALUE:
+                    if cell.col not in column_cells:
+                        column_cells[cell.col] = set()
+                    if cell.val in column_cells[cell.col]:
+                        return False
+
+                    column_cells[cell.col].add(cell.val)
+
+                box_no = self.get_box_no(row, column)
+
+                # duplicate check on box
+                if cell.val != Sudoku.EMPTY_CELL_VALUE:
+                    if box_no not in box_cells:
+                        box_cells[box_no] = set()
+
+                    if cell.val in box_cells[box_no]:
+                        return False
+
+                    box_cells[box_no].add(cell.val)
+
+                # Initialize
+                if column not in self.same_column_cells:
+                    self.same_column_cells[column] = []
+                self.same_column_cells[column].append(cell)
+
+                box_no = self.get_box_no(row, column)
+
+                if box_no not in self.same_box_cells:
+                    self.same_box_cells[box_no] = []
+
+                self.same_box_cells[box_no].append(cell)
+
+        return True
 
     @staticmethod
     def get_random_sudoku():

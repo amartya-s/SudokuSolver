@@ -1,7 +1,7 @@
 import time
 import tkinter as tk
 
-from SudokuSolver.solver import SudokuSolver
+from SudokuSolver.solver import Solver
 
 
 class CustomText(tk.Text):
@@ -44,12 +44,12 @@ class Application(tk.Frame):
         self.sudoku_cell_gui_objs = []
 
     def load_sample_sudoku(self, frame):
-        sample_sudoku = SudokuSolver.get_sample_sudoku()
-        self.sudoku = SudokuSolver(gui=self, **{'matrix': sample_sudoku, 'size': len(sample_sudoku)})
+        sample_sudoku = Solver.get_sample_sudoku()
+        self.sudoku = Solver(gui=self, **{'matrix': sample_sudoku, 'size': len(sample_sudoku)})
         self.create_sudoku_layout(frame)
 
     def create_empty_sudoku(self, frame, size=9):
-        self.sudoku = SudokuSolver(gui=self, **{'matrix': [], 'size': size})
+        self.sudoku = Solver(gui=self, **{'matrix': [], 'size': size})
         self.create_sudoku_layout(frame)
 
     def retrieve_input(self, frame):
@@ -127,12 +127,14 @@ class Application(tk.Frame):
 
     def solve_sudoku(self, frame):
 
+
         self.retrieve_input(frame)
 
         children = frame.winfo_children()
 
         text_labels = []
 
+        # un-binding events so that solver does not interfere
         for child in children:
             for sub_child in child.winfo_children():
                 sub_child.unbind("<<TextModified>>")
@@ -141,15 +143,20 @@ class Application(tk.Frame):
 
         self.status_label['text'] = ''
 
-        status = self.sudoku.solve()
+        validation_status, solver_status = self.sudoku.solve()
 
-        if status:
+        if not validation_status:
+            self.status_label['text'] = 'Invalid input. \nUnable to solve the sudoku'
+            self.status_label['fg'] = 'red'
+
+        if solver_status:
             self.status_label['text'] = 'Soduko Solved !'
             self.status_label['fg'] = 'green'
         else:
             self.status_label['text'] = 'Invalid input. \nUnable to solve the sudoku'
             self.status_label['fg'] = 'red'
 
+        # rebinding events
         for label in text_labels:
             label.bind("<<TextModified>>", self.on_modification)
             label.bind("<<TextDeleted>>", self.on_deletion)
@@ -230,14 +237,14 @@ if __name__ == '__main__':
     s_time = time.time()
 
     root = tk.Tk()
-
-    img = tk.PhotoImage('images/sudoku.ico')
-    root.iconbitmap(img)
+    #
+    # img = tk.PhotoImage('images/sudoku.ico')
+    # root.iconbitmap(img)
 
     app = Application(master=root)
 
     app.master.title("Sudoku Solver")
-    app.master.geometry("1000x900")
+    app.master.geometry("1100x900")
 
 
     app.mainloop()
