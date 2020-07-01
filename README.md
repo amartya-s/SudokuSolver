@@ -4,12 +4,12 @@
 #### Watch the program solve sudoku using recursion and backtracking algorithm. 
 
 
-#####Run a sample sudoku
+##### Run a sample sudoku
 <a href="https://gifyu.com/image/Q2xz"><img src="https://s7.gifyu.com/images/sample_sudoku.gif" alt="sample_sudoku.gif" border="0" /></a>
 
 <b>OR</b>
 
-#####Create your own sudoku
+##### Create your own sudoku
 <a href="https://gifyu.com/image/Q2sP"><img src="https://s7.gifyu.com/images/new-sudoku.gif" alt="new-sudoku.gif" border="0" /></a>
 
 #### This application can be run using either of the below methods
