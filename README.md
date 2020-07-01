@@ -17,8 +17,8 @@
 - Executing the <b><i>gui.exe</i></b> file present under <i>dist</i> directory
     
 ### Note
-- ######The executable file gui.exe  file has been created using external open source tool <a href='http://www.pyinstaller.org/'>pyinstaller</a>
+- #####The executable file gui.exe  file has been created using external open source tool <a href='http://www.pyinstaller.org/'>pyinstaller</a>
 
-  ######You can also create it locally by running following command: <i>pyinstaller.exe --onefile gui.py</i>
+  #####You can also create it locally by running following command: <i>pyinstaller.exe --onefile gui.py</i>
   
-- ######GUI has been built using TkInter - Python's de-facto standard GUI package
+- #####GUI has been built using TkInter - Python's de-facto standard GUI package
