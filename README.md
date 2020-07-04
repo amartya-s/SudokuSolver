@@ -19,6 +19,6 @@
 ### Note
 -  The executable file gui.exe  file has been created using external open source tool <a href='http://www.pyinstaller.org/'>pyinstaller</a>
 
-   You can also create it locally by running following command: <i>pyinstaller.exe --onefile gui.py</i>
+   You can also create it locally by running following command: <i>pyinstaller.exe --onefile gui.py -n SudokuSolver</i>
   
 -  GUI has been built using TkInter - Python's de-facto standard GUI package
