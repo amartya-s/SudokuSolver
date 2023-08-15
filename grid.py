@@ -1,6 +1,7 @@
 import math
 import random
 
+
 class Cell(object):
     def __init__(self, val, row, col, row_w=0, col_w=0, box_w=0, wt=0):
         self.val = val
@@ -15,7 +16,7 @@ class Cell(object):
         self.moves_label = None
 
 
-class Sudoku(object):
+class Grid(object):
     EMPTY_CELL_VALUE = -1
 
     def __init__(self, gui=None, **kwargs):
@@ -103,7 +104,7 @@ class Sudoku(object):
                     self.required_moves += 1
 
                 # duplicate check on row
-                if cell.val != Sudoku.EMPTY_CELL_VALUE:
+                if cell.val != Grid.EMPTY_CELL_VALUE:
                     if cell.col not in row_cells:
                         row_cells[cell.col] = set()
 
@@ -113,7 +114,7 @@ class Sudoku(object):
                     row_cells[cell.col].add(cell.val)
 
                 # duplicate check on column
-                if cell.val != Sudoku.EMPTY_CELL_VALUE:
+                if cell.val != Grid.EMPTY_CELL_VALUE:
                     if cell.col not in column_cells:
                         column_cells[cell.col] = set()
                     if cell.val in column_cells[cell.col]:
@@ -124,7 +125,7 @@ class Sudoku(object):
                 box_no = self.get_box_no(row, column)
 
                 # duplicate check on box
-                if cell.val != Sudoku.EMPTY_CELL_VALUE:
+                if cell.val != Grid.EMPTY_CELL_VALUE:
                     if box_no not in box_cells:
                         box_cells[box_no] = set()
 
@@ -166,7 +167,7 @@ class Sudoku(object):
 
     @staticmethod
     def get_sample_sudoku():
-        sample_matrixs = [[[-1, -1, -1, 6, -1, -1, 4, -1, -1],
+        sample_matrix = [[[-1, -1, -1, 6, -1, -1, 4, -1, -1],
                            [7, -1, -1, -1, -1, 3, 6, -1, -1],
                            [-1, -1, -1, -1, 9, 1, -1, 8, -1],
                            [-1, -1, -1, -1, -1, -1, -1, -1, -1],
@@ -195,7 +196,7 @@ class Sudoku(object):
                            [-1, -1, -1, -1, 6, 2, 8, -1, 5]]
 
                           ]
-        return sample_matrixs[random.randint(0, 99) % 3]
+        return sample_matrix[random.randint(0, 99) % 3]
 
 #              [[8, 3, 5, 4, 1, 6, 9, 2, 7],
 #              [2, 9, 6, 8, 5, 7, 4, 3, 1],

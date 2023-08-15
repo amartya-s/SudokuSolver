@@ -1,12 +1,17 @@
 import copy
+import random
 
-from SudokuSolver.sudoku import Sudoku
+from SudokuSolver.grid import Grid
 
-EMPTY_CELL_VALUE = Sudoku.EMPTY_CELL_VALUE
+EMPTY_CELL_VALUE = Grid.EMPTY_CELL_VALUE
 
 
-class Solver(Sudoku):
+class Solver(Grid):
+
     def compute_weights(self, cell=None, revert=False):
+        """ for optimizing recursive calls assign weight to each cell in the matrix
+            cell with max weight is solved first """
+
         if cell:
             original_cell = cell
 
@@ -171,7 +176,6 @@ class Solver(Sudoku):
 
         else:
             print("All possible moves on [{},{}] failed. Need to backtrack now".format(cell.row, cell.col))
-            print()
 
             cell.possible_moves = []
 
@@ -195,14 +199,13 @@ class Solver(Sudoku):
 
             print("Status of solving sudoku: {}".format(solver_status))
 
-            return True, True
+            return validation, solver_status
 
         else:
-            return False, False
+            return validation, False
 
 
 if __name__ == '__main__':
     pass
-    #
-    # sudoku = SudokuSolver(**{'matrix': Sudoku.get_sample_sudoku()})
-    # sudoku.solve()
+    #sudoku = Solver(**{'matrix': [[1,-1,-1,-1],[-1,-1,3,-1],[-1,-1,-1,-1],[-1,2,-1,1]], 'size':4})
+    #sudoku.solve()
