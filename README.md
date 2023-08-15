@@ -1,16 +1,8 @@
 # SudokuSolver
 ## A simple solver with GUI for Sudoku puzzles.
 
-#### Watch the program solve sudoku using recursion and backtracking algorithm. 
+#### Watch the program solve sudoku using recursion and backtracking. 
 
-
-##### Run a sample sudoku
-<a href="https://gifyu.com/image/Q2xz"><img src="https://s7.gifyu.com/images/sample_sudoku.gif" alt="sample_sudoku.gif" border="0" /></a>
-
-<b>OR</b>
-
-##### Create your own sudoku
-<a href="https://gifyu.com/image/Q2sP"><img src="https://s7.gifyu.com/images/new-sudoku.gif" alt="new-sudoku.gif" border="0" /></a>
 
 #### This application can be run using either of the below methods
 - Directly executing the <b><i>gui.py</i></b> file
@@ -22,3 +14,7 @@
    You can also create it locally by running following command: <i>pyinstaller.exe --onefile gui.py -n SudokuSolver</i>
   
 -  GUI has been built using TkInter - Python's de-facto standard GUI package
+
+  
+https://github.com/amartya-s/SudokuSolver/assets/13063884/29727e46-4303-473a-9d54-2db56d6d9483
+
