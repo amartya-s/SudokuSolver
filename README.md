@@ -5,12 +5,12 @@
 
 
 ##### Run a sample sudoku
-<a href="https://gifyu.com/image/Q2xz"><img src="https://s7.gifyu.com/images/sample_sudoku.gif" alt="sample_sudoku.gif" border="0" /></a>
+![sample_sudoku](https://github.com/amartya-s/SudokuSolver/assets/13063884/8064396a-bd3e-4f9c-9792-3b8833f32ff1)
 
 <b>OR</b>
 
 ##### Create your own sudoku
-<a href="https://gifyu.com/image/Q2sP"><img src="https://s7.gifyu.com/images/new-sudoku.gif" alt="new-sudoku.gif" border="0" /></a>
+![new-sudoku](https://github.com/amartya-s/SudokuSolver/assets/13063884/64ed6371-39b4-40c3-bef1-b63e5fd823b7)
 
 #### This application can be run using either of the below methods
 - Directly executing the <b><i>gui.py</i></b> file
